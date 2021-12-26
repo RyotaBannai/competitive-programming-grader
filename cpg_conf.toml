@@ -1,0 +1,12 @@
+[lang]
+language = "c++"
+
+[compile]
+compile = true
+command = "clang++ -std=c++14 -stdlib=libc++ {FILENAME}"
+output_dir = "."
+output_filename = "a.out"
+
+[test]
+testfile_dir = "."
+parse_comments = true
