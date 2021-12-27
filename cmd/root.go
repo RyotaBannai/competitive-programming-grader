@@ -5,23 +5,42 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at http://hugo.spf13.com`,
+	Use:   "cpg",
+	Short: "Competitive Programming Grader for automating coding-build-testing loop. ",
+	Long: `Competitive Programming Grader for automating coding-build-testing loop. 
+- Created and maintained by RyotaBannai`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
 	},
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Create test file for Problem X",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("[input]")
+		fmt.Println("[output]")
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
+	rootCmd.PersistentFlags().StringP("create", "c", "", "Filename to create test files. cpg -c d")
+}
+
 func Execute() {
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	Debug(LoadConf())
+
+	viper.BindPFlags(rootCmd.PersistentFlags())
+	Debug(viper.Get("create"))
+	// or bind to private variable
+	// var Source string
+	// rootCmd.Flags().StringVarP(&Source, "source", "s", "", "Source directory to read from")
 }

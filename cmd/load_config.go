@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/k0kubun/pp"
 	"github.com/spf13/viper"
 )
 
@@ -29,10 +28,6 @@ type Config struct {
 	Compile CompileConfig
 	Lang    LangConfig
 	Test    TestConfig
-}
-
-func Debug(c interface{}) {
-	pp.Println(c)
 }
 
 func LoadConf() (c Config) {
