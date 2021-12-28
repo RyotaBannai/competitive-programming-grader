@@ -8,5 +8,5 @@ output_dir = "."
 output_filename = "a.out" # this really doesn't matter how you name it.
 
 [test]
-testfile_dir = "." # this is where cpg will find the test files
+testfile_dir = "./cpg_test" # this is where cpg will find the test files
 parse_comments = true # should cpg remove comments from test files? If you add comments on test files and set this as false, test won't really work properly.

@@ -8,5 +8,5 @@ output_dir = "."
 output_filename = "a.out"
 
 [test]
-testfile_dir = "."
+testfile_dir = "./cpg_test"
 parse_comments = true
