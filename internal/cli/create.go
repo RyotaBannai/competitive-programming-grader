@@ -6,11 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
+
+	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 )
 
 var createCmd = &cobra.Command{
@@ -98,9 +99,13 @@ var createCmd = &cobra.Command{
 			return
 		}
 
+		location := time.FixedZone("Asia/Tokyo", 9*60*60) // will be fixed from env variable
+		now := func() time.Time { return time.Now().In(location) }
+		suffix := now().Format(time.RFC3339)
+
 		// ready to write
-		inf := filepath.Join(inDir, "sample_in_"+fmt.Sprintf("%v", insamples)+".txt ")
-		outf := filepath.Join(outDir, "sample_out_"+fmt.Sprintf("%v", outsamples)+".txt ")
+		inf := filepath.Join(inDir, "sample_in_"+fmt.Sprintf("%v", insamples)+"_"+suffix+".txt ")
+		outf := filepath.Join(outDir, "sample_out_"+fmt.Sprintf("%v", outsamples)+"_"+suffix+".txt ")
 
 		for _, p := range []struct {
 			path     string
