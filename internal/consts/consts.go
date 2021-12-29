@@ -1,4 +1,4 @@
-package cmd
+package consts
 
 type CPG_ANNOTATIONS struct {
 	DIRSPEC string

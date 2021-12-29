@@ -1,13 +1,13 @@
-package cmd
+package appio
 
 import (
+	"RyotaBannai/competitive-programming-grader/internal/consts"
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/k0kubun/pp"
 )
 
 type FileCotents struct {
@@ -15,12 +15,8 @@ type FileCotents struct {
 	Comments []string // all comments in file `//` or multiline comment `/** ... */`
 }
 
-func Debug(c interface{}) {
-	pp.Println(c)
-}
-
 // exists returns whether the given file or directory exists
-func exists(path string) (bool, error) {
+func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true, nil
@@ -31,8 +27,8 @@ func exists(path string) (bool, error) {
 	return false, err
 }
 
-func existsOrCreateFolder(dir string) (bool, error) {
-	if result, _ := exists(dir); !result {
+func ExistsOrCreateFolder(dir string) (bool, error) {
+	if result, _ := Exists(dir); !result {
 		if err := os.Mkdir(dir, 0755); err != nil {
 			// failed to create
 			return false, err
@@ -46,7 +42,7 @@ func existsOrCreateFolder(dir string) (bool, error) {
 	}
 }
 
-func fileCloser(file *os.File) {
+func FileCloser(file *os.File) {
 	if err := file.Close(); err != nil {
 		// log.Fatal(fmt.Sprintf("error occurred while closing file [%v]", file.Name()))
 		log.Fatal(err)
@@ -55,7 +51,7 @@ func fileCloser(file *os.File) {
 	}
 }
 
-func fileOpener(filepath string) (file *os.File, err error) {
+func FileOpener(filepath string) (file *os.File, err error) {
 	if file, err = os.Open(filepath); err != nil { // file に assign するのは メモリ上の実態データ
 		fmt.Println("file doesn't exist.")
 		// log.Println(fmt.Sprintf("file [%v] doesn't exist", file.Name()))
@@ -66,7 +62,7 @@ func fileOpener(filepath string) (file *os.File, err error) {
 	}
 }
 
-func peekComment(file *os.File) string {
+func PeekComment(file *os.File) string {
 	if comments := readFileContentsByParsingComments(file, true).Comments; len(comments) > 0 {
 		return comments[0]
 	} else {
@@ -74,9 +70,9 @@ func peekComment(file *os.File) string {
 	}
 }
 
-func checkDirSpecAnnotation(line string) (dirSpec string, b bool) {
-	if strings.Contains(line, ANNOTATIONS.DIRSPEC) {
-		splitted := strings.Split(line, ANNOTATIONS.DIRSPEC)
+func CheckDirSpecAnnotation(line string) (dirSpec string, b bool) {
+	if strings.Contains(line, consts.ANNOTATIONS.DIRSPEC) {
+		splitted := strings.Split(line, consts.ANNOTATIONS.DIRSPEC)
 		token := strings.Fields(splitted[1])
 		if len(token) > 0 {
 			return token[0], true
@@ -85,7 +81,7 @@ func checkDirSpecAnnotation(line string) (dirSpec string, b bool) {
 	return "", false
 }
 
-func readFileContents(file *os.File) FileCotents {
+func ReadFileContents(file *os.File) FileCotents {
 	return readFileContentsByParsingComments(file, false)
 }
 
@@ -152,4 +148,30 @@ func readFileContentsByParsingComments(file *os.File, takeFirstComment bool) Fil
 	}
 
 	return FileCotents{Contents: contents, Comments: comments}
+}
+
+func ReadLines() ([]string, error) {
+	var txt []string
+	s := bufio.NewScanner(os.Stdin)
+	for s.Scan() {
+		line := s.Text()
+		if line != "" {
+			if fmt.Sprintf("%v", strings.TrimSpace(line)) == "q!" {
+				// force quit input test case
+				return txt, errors.New("force quit")
+			} else if fmt.Sprintf("%v", s.Bytes()[0]) == "27" {
+				// finish with esc key.
+				// convert byte to ascii code
+				break
+			}
+		}
+		txt = append(txt, line)
+		// log.Print(strconv.Quote(s.Text()))
+	}
+
+	if s.Err() != nil {
+		// non-EOF error.
+		log.Fatal(s.Err())
+	}
+	return txt, nil
 }

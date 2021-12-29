@@ -1,9 +1,11 @@
-package cmd
+package config
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"RyotaBannai/competitive-programming-grader/internal/consts"
 
 	"github.com/spf13/viper"
 )
@@ -32,10 +34,10 @@ type Config struct {
 
 func LoadConf() (c Config) {
 	v := viper.New()
-	dir, file := filepath.Split(fmt.Sprintf("%v", os.Getenv(APP_CONF_EV)))
-	if dir == "" && file == NIL { // 環境変数が設定されていない
-		file = DEFAULT_CONF_FILENAME
-		dir = DEFAULT_CONF_DIR
+	dir, file := filepath.Split(fmt.Sprintf("%v", os.Getenv(consts.APP_CONF_EV)))
+	if dir == "" && file == consts.NIL { // 環境変数が設定されていない
+		file = consts.DEFAULT_CONF_FILENAME
+		dir = consts.DEFAULT_CONF_DIR
 	}
 	v.SetConfigName(file)
 	v.AddConfigPath(dir)
