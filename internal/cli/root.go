@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -32,6 +33,19 @@ func init() {
 	// or bind to private variable
 	// var Source string
 	// rootCmd.Flags().StringVarP(&Source, "source", "s", "", "Source directory to read from")
+}
+
+func takeProb() (string, error) {
+	var p interface{}
+	if viper.Get("p") != nil {
+		p = viper.Get("p")
+	} else if viper.Get("prob") != "" {
+		p = viper.Get("prob")
+	} else {
+		// finish.
+		return "", errors.New("flag p is required")
+	}
+	return fmt.Sprintf("%v", p), nil
 }
 
 func Execute() {

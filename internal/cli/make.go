@@ -11,31 +11,23 @@ import (
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createCmd = &cobra.Command{
-	Use:   "m",
-	Short: "Make test file for Problem X i.g. cpg m -p d",
+	Use:   "make",
+	Short: "Make a test case for a problem X i.g. cpg make -p d.cpp",
 	Run: func(cmd *cobra.Command, args []string) {
-		var p interface{}
-		if viper.Get("p") != nil {
-			p = viper.Get("p")
-		} else if viper.Get("prob") != "" {
-			p = viper.Get("prob")
-		} else {
-			// finish.
-			fmt.Println("Please set problem")
+		p, err := takeProb()
+		if err != nil {
+			fmt.Println("Please choose a problem and set [p] flag")
+			return
+		}
+		if result, _ := appio.Exists(p); !result {
+			fmt.Printf("file path [%v] is not found.\n", p)
 			return
 		}
 
-		pStr := fmt.Sprintf("%v", p)
-		if result, _ := appio.Exists(pStr); !result {
-			fmt.Printf("file path [%v] is not found.\n", pStr)
-			return
-		}
-
-		handle, err := appio.FileOpener(pStr)
+		handle, err := appio.FileOpener(p)
 		defer appio.FileCloser(handle)
 		if err != nil {
 			return
@@ -57,7 +49,8 @@ var createCmd = &cobra.Command{
 			dirSpecPath = filepath.Join(testDir, dirSpec)
 		} else {
 			// use filename as test file dir i.g. a.cpp -> a
-			splited := strings.Split(pStr, ".")
+			// first, remove all dir path
+			splited := strings.Split(filepath.Base(p), ".")
 			dirSpecPath = filepath.Join(testDir, splited[0])
 		}
 
