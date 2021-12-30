@@ -95,7 +95,7 @@ var createCmd = &cobra.Command{
 
 		location := time.FixedZone("Asia/Tokyo", 9*60*60) // will be fixed from env variable
 		now := func() time.Time { return time.Now().In(location) }
-		suffix := now().Format(time.RFC3339)
+		suffix := now().Format("2006-01-02_15:04:05") // or time.RFC3339
 
 		// ready to write
 		inf := filepath.Join(inDir, "sample_in_"+fmt.Sprintf("%v", insamples)+"_"+suffix+".txt ")

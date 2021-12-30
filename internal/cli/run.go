@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gookit/color"
 	"github.com/mattn/go-shellwords"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
@@ -98,6 +99,8 @@ var runTestCmd = &cobra.Command{
 		sort.Slice(infiles, byName(infiles))
 		sort.Slice(outfiles, byName(outfiles))
 
+		nTestCases := len(infiles)
+		color.Bold.Printf("\nFound %v test cases:\n\n", nTestCases)
 		for i := 0; i < len(infiles); i++ {
 			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
 			handle1, err := appio.FileOpener(iTestCasePath)
@@ -133,16 +136,20 @@ var runTestCmd = &cobra.Command{
 
 			expect := strings.TrimSpace(strings.Join(ofc.Contents[:], "\n"))
 			actual := strings.TrimSpace(string(out))
-
-			if expect == actual {
-				fmt.Printf("Ok [%s]\n", iTestCasePath)
-			} else {
-				fmt.Printf("Failed [%v]\n", iTestCasePath)
+			if expect == actual { // show success message
+				color.New(color.Gray, color.BgGreen, color.Bold).Print(" PASS ")
+				color.Green.Print(" ✔")
+				color.Gray.Printf(" %v\n\n", iTestCasePath)
+			} else { // show failed message
+				color.Error.Print(" Fail ")
+				color.Red.Print(" ×")
+				color.HiWhite.Printf(" %v\n\n", iTestCasePath)
+				// show diff
+				color.HiWhite.Println("Diff:")
 				dmp := diffmatchpatch.New()
 				diffs := dmp.DiffMain(expect, actual, false)
 				fmt.Println(dmp.DiffPrettyText(diffs))
-
-				break
+				return
 			}
 		}
 		fmt.Println("Done.")
