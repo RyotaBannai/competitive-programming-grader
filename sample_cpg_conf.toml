@@ -1,12 +1,10 @@
 [lang]
-language = "your favorite language i.g. python"
+language = "c++" # your favorite language. this is optional
 
 [compile]
 compile = true # ture if you'd prefer to compile the target file before run test
 command = "go build {FILENAME}" # specify build command with {FILENAME}, which is where cpg should put filename.
 output_dir = "."
-output_filename = "a.out" # this really doesn't matter how you name it.
 
 [test]
 testfile_dir = "./cpg_test.toml" # this is where cpg will find the test files
-parse_comments = true # should cpg remove comments from test files? If you add comments on test files and set this as false, test won't really work properly.

@@ -5,8 +5,6 @@ language = "c++"
 compile = true
 command = "clang++ -std=c++14 -stdlib=libc++ {FILENAME}"
 output_dir = "."
-output_filename = "a.out"
 
 [test]
 testfile_dir = "../../cpg_test.toml"
-parse_comments = true

@@ -17,15 +17,13 @@ type LangConfig struct {
 }
 
 type CompileConfig struct {
-	Compile        bool
-	Command        string
-	OutputDir      string `mapstructure:"output_dir"`
-	OutputFilename string `mapstructure:"output_filename"`
+	Compile   bool
+	Command   string
+	OutputDir string `mapstructure:"output_dir"`
 }
 
 type TestConfig struct {
-	TestfileDir   string `mapstructure:"testfile_dir"`
-	ParseComments bool   `mapstructure:"parse_comments"`
+	TestfileDir string `mapstructure:"testfile_dir"`
 }
 
 type Config struct {
