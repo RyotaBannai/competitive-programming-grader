@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"RyotaBannai/competitive-programming-grader/internal/consts"
+	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 
 	"github.com/spf13/viper"
 )
@@ -32,23 +34,36 @@ type Config struct {
 	Test    TestConfig
 }
 
+// accept format:
+// $HOME/cpg_conf
+// $HOME/cpg_conf.toml
+// If there is no `CPG_CONF_PATH` env varaible, then looking for `cpg_conf.toml` in current directry
 func LoadConf() (c Config) {
-	v := viper.New()
-	dir, file := filepath.Split(fmt.Sprintf("%v", os.Getenv(consts.APP_CONF_EV)))
-	if dir == "" && file == consts.NIL { // 環境変数が設定されていない
+	var (
+		file string
+		dir  string
+	)
+	envfilepath := os.Getenv(consts.APP_CONF_EV)
+	if result, _ := appio.Exists(envfilepath); !result { // 環境変数が指定されていない時も空で見つからない
 		file = consts.DEFAULT_CONF_FILENAME
 		dir = consts.DEFAULT_CONF_DIR
+	} else {
+		dir, file = filepath.Split(envfilepath)
 	}
-	v.SetConfigName(file)
+
+	name := strings.TrimSuffix(file, filepath.Ext(file))
+	v := viper.New()
+	v.SetConfigName(name)
 	v.AddConfigPath(dir)
 
 	if err := v.ReadInConfig(); err != nil {
-		fmt.Printf("couldn't load config: %s", err)
+		fmt.Printf("%s\n", err.Error())
 		os.Exit(1)
 	}
 
 	if err := v.Unmarshal(&c); err != nil {
-		fmt.Printf("couldn't read config: %s", err)
+		fmt.Printf("%s\n", err.Error())
+		os.Exit(1)
 	}
 
 	return
