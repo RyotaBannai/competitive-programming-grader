@@ -115,7 +115,7 @@ var runTestCmd = &cobra.Command{
 
 			var cmd *exec.Cmd
 			if conf.Compile.Compile { // use executable
-				cmd = exec.Command("./a.out")
+				cmd = exec.Command(appio.Join(conf.Compile.OutputDir, consts.EXECUTABLE_NAME))
 			} else { // use given command for script files
 				cmd = exec.Command(c[0], c[1:]...)
 			}

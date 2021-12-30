@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -174,4 +175,30 @@ func ReadLines() ([]string, error) {
 		log.Fatal(s.Err())
 	}
 	return txt, nil
+}
+
+// absorb some irregular patterns
+// accepts:
+// `./dir` or `./` and return as it is
+// `.` or `/` and return with `./`
+// others are constructed by filepath.Join as default
+func Join(elem ...string) string {
+	if len(elem) == 0 {
+		return ""
+	}
+	sep := string(filepath.Separator)
+	if strings.HasPrefix(elem[0], "."+sep) { // `./dir` or `./`
+		splited := strings.Split(elem[0], sep)
+		var s string
+		if len(splited) >= 2 && splited[1] != "" { // `./dir`
+			s += sep + splited[1] + sep
+		} else { // `./`
+			s += sep
+		}
+		return "." + s + filepath.Join(elem[1:]...)
+	} else if ((strings.HasPrefix(elem[0], ".")) && !strings.HasPrefix(elem[0], "..")) || strings.HasPrefix(elem[0], sep) { // `.` or `/`
+		return "." + sep + filepath.Join(elem[1:]...)
+	} else { // others. i.g. `../` , `../config/` or `config/` etc.
+		return filepath.Join(elem[:]...)
+	}
 }

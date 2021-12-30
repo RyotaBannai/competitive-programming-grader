@@ -10,6 +10,7 @@ const (
 	DEFAULT_CONF_FILENAME        = "cpg_conf.toml"
 	DEFAULT_CONF_DIR             = "."
 	COMMAND_FILENAME_PLACEHOLDER = "{FILENAME}"
+	EXECUTABLE_NAME              = "a.out"
 )
 
 var (

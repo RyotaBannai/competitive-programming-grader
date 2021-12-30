@@ -5,8 +5,8 @@ language = "c++"
 # compile = false
 # command = "python {FILENAME}"
 compile = true
-command = "clang++ -std=c++14 -stdlib=libc++ {FILENAME}"
-output_dir = "."
+command = "clang++ -std=c++14 -stdlib=libc++ -o ../../a.out {FILENAME}"
+output_dir = "../../"
 
 [test]
 testfile_dir = "../../cpg_test"
