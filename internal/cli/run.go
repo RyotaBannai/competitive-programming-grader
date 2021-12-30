@@ -18,8 +18,9 @@ import (
 )
 
 var runTestCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run tests for a problem X i.g. cpg run -p d.cpp",
+	Use:     "run",
+	Short:   "Run tests for a problem X",
+	Example: "  cpg run -p d.cpp",
 	Run: func(cmd *cobra.Command, args []string) {
 		p, err := takeProb()
 		if err != nil {

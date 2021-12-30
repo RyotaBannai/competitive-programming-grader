@@ -13,11 +13,13 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "cpg",
-	Short: "Competitive Programming Grader for automating coding-build-testing loop. ",
-	Long: `Competitive Programming Grader for automating coding-build-testing loop. 
-- Created and maintained by RyotaBannai`,
+	Short: "Competitive Programming Grader",
+	Long:  "Competitive Programming Grader for automating coding-build-testing loop",
 	Run: func(cmd *cobra.Command, args []string) {
-		// pass
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
 	},
 }
 

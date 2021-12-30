@@ -4,22 +4,25 @@ go 1.17
 
 require (
 	github.com/k0kubun/pp v3.0.1+incompatible
+	github.com/mattn/go-shellwords v1.0.12
+	github.com/sergi/go-diff v1.2.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
 )
 
 require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/hashicorp/go-version v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mattn/go-shellwords v1.0.12 // indirect
+	github.com/mitchellh/gox v1.0.1 // indirect
+	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

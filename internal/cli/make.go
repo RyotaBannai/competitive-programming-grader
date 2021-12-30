@@ -14,8 +14,9 @@ import (
 )
 
 var createCmd = &cobra.Command{
-	Use:   "make",
-	Short: "Make a test case for a problem X i.g. cpg make -p d.cpp",
+	Use:     "make",
+	Short:   "Make a test case for a problem X",
+	Example: "  cpg make -p d.cpp",
 	Run: func(cmd *cobra.Command, args []string) {
 		p, err := takeProb()
 		if err != nil {
@@ -122,6 +123,6 @@ var createCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("Finished to create test case. \nin[ %v]\nout[ %v]\n", inf, outf)
+		fmt.Printf("Finished to create a test case. \nin[ %v]\nout[ %v]\n", inf, outf)
 	},
 }
