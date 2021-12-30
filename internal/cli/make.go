@@ -20,7 +20,7 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		p, err := takeProb()
 		if err != nil {
-			fmt.Println("Please choose a problem and set [p] flag")
+			fmt.Println("Please set [p] flag")
 			return
 		}
 		if result, _ := appio.Exists(p); !result {

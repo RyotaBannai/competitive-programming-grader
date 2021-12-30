@@ -5,12 +5,13 @@ type CPG_ANNOTATIONS struct {
 }
 
 const (
-	APP_CONF_EV                  = "CPG_CONF_PATH"
 	NIL                          = "<nil>"
-	DEFAULT_CONF_FILENAME        = "cpg_conf.toml"
-	DEFAULT_CONF_DIR             = "."
-	COMMAND_FILENAME_PLACEHOLDER = "{FILENAME}"
-	EXECUTABLE_NAME              = "a.out"
+	APP_NAME                     = "cpg"           // unchangeable
+	APP_CONF_EV                  = "CPG_CONF_PATH" // unchangeable
+	APP_CONF_FILENAME            = "cpg_conf.toml" // unchangeable
+	DEFAULT_CONF_DIR             = "."             // changeable
+	COMMAND_FILENAME_PLACEHOLDER = "{FILENAME}"    // unchangeable
+	EXECUTABLE_NAME              = "a.out"         // unchangeable
 )
 
 var (
