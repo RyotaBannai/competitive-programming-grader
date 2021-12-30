@@ -2,9 +2,11 @@
 language = "c++"
 
 [compile]
+# compile = false
+# command = "python {FILENAME}"
 compile = true
 command = "clang++ -std=c++14 -stdlib=libc++ {FILENAME}"
 output_dir = "."
 
 [test]
-testfile_dir = "../../cpg_test.toml"
+testfile_dir = "../../cpg_test"

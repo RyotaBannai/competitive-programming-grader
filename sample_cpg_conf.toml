@@ -7,4 +7,4 @@ command = "go build {FILENAME}" # specify build command with {FILENAME}, which i
 output_dir = "."
 
 [test]
-testfile_dir = "./cpg_test.toml" # this is where cpg will find the test files
+testfile_dir = "./cpg_test" # this is where cpg will find the test files

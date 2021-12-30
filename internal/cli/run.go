@@ -84,7 +84,7 @@ var runTestCmd = &cobra.Command{
 		if conf.Compile.Compile {
 			// expect compiled excutable filepath is `./a.out`
 			if _, err := exec.Command(c[0], c[1:]...).Output(); err != nil {
-				fmt.Printf("failed to exec compile [%v]\n", command)
+				fmt.Printf("failed to compile [%v]\n", command)
 				return
 			}
 		}
@@ -96,13 +96,16 @@ var runTestCmd = &cobra.Command{
 		}
 		sort.Slice(infiles, byName(infiles))
 		sort.Slice(outfiles, byName(outfiles))
+
 		for i := 0; i < len(infiles); i++ {
-			handle1, err := appio.FileOpener(filepath.Join(inDir, infiles[i].Name()))
+			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
+			handle1, err := appio.FileOpener(iTestCasePath)
 			defer appio.FileCloser(handle1)
 			if err != nil {
 				return
 			}
-			handle2, err := appio.FileOpener(filepath.Join(outDir, outfiles[i].Name()))
+			oTestCasePath := filepath.Join(outDir, outfiles[i].Name())
+			handle2, err := appio.FileOpener(oTestCasePath)
 			defer appio.FileCloser(handle2)
 			if err != nil {
 				return
@@ -110,7 +113,13 @@ var runTestCmd = &cobra.Command{
 			ifc := appio.ReadFileContents(handle1)
 			ofc := appio.ReadFileContents(handle2)
 
-			cmd := exec.Command("./a.out")
+			var cmd *exec.Cmd
+			if conf.Compile.Compile { // use executable
+				cmd = exec.Command("./a.out")
+			} else { // use given command for script files
+				cmd = exec.Command(c[0], c[1:]...)
+			}
+
 			stdin, _ := cmd.StdinPipe()
 			io.WriteString(stdin, strings.Join(ifc.Contents[:], "\n"))
 			stdin.Close()
@@ -124,11 +133,10 @@ var runTestCmd = &cobra.Command{
 			expect := strings.TrimSpace(strings.Join(ofc.Contents[:], "\n"))
 			actual := strings.TrimSpace(string(out))
 
-			testCaseName := strings.TrimSpace(infiles[i].Name())
 			if expect == actual {
-				fmt.Printf("Ok [%s]\n", testCaseName)
+				fmt.Printf("Ok [%s]\n", iTestCasePath)
 			} else {
-				fmt.Printf("Failed [%v]\n", testCaseName)
+				fmt.Printf("Failed [%v]\n", iTestCasePath)
 				dmp := diffmatchpatch.New()
 				diffs := dmp.DiffMain(expect, actual, false)
 				fmt.Println(dmp.DiffPrettyText(diffs))
