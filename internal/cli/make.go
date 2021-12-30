@@ -10,6 +10,7 @@ import (
 
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,7 @@ var createCmd = &cobra.Command{
 	Short:   "Make a test case for a problem X",
 	Example: "  cpg make -p d.cpp",
 	Run: func(cmd *cobra.Command, args []string) {
-		p, err := takeProb()
+		p, err := getProb()
 		if err != nil {
 			fmt.Println("Please set [p] flag")
 			return
@@ -80,16 +81,16 @@ var createCmd = &cobra.Command{
 		}
 
 		// ready to accept inputs
-		fmt.Println("[input]")
+		color.Notice.Println("[input]")
 		in, err := appio.ReadLines()
 		if err != nil {
-			fmt.Println("goodbye.")
+			color.HiWhite.Println("goodbye.")
 			return
 		}
-		fmt.Println("[output]")
+		color.Notice.Println("[output]")
 		out, err := appio.ReadLines()
 		if err != nil {
-			fmt.Println("goodbye.")
+			color.HiWhite.Println("goodbye.")
 			return
 		}
 
@@ -123,6 +124,8 @@ var createCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("Finished to create a test case. \nin[ %v]\nout[ %v]\n", inf, outf)
+		arrow := color.Bold.Sprint("→")
+		color.New(color.HiWhite, color.Bold).Print("\nCreated a test case in the following paths: \n")
+		color.HiWhite.Printf("[input]  "+arrow+" %v\n[outout] "+arrow+" %v\n", strings.TrimSpace(inf), strings.TrimSpace(outf))
 	},
 }

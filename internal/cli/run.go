@@ -23,7 +23,7 @@ var runTestCmd = &cobra.Command{
 	Short:   "Run tests for a problem X",
 	Example: "  cpg run -p d.cpp",
 	Run: func(cmd *cobra.Command, args []string) {
-		p, err := takeProb()
+		p, err := getProb()
 		if err != nil {
 			fmt.Println("Please set [p] flag")
 			return
@@ -68,10 +68,8 @@ var runTestCmd = &cobra.Command{
 		}
 
 		infiles, _ := ioutil.ReadDir(inDir)
-		insamples := len(infiles)
 		outfiles, _ := ioutil.ReadDir(outDir)
-		outsamples := len(outfiles)
-		if insamples != outsamples {
+		if len(infiles) != len(outfiles) {
 			fmt.Println("mismatch number of in and out cases")
 			return
 		}
@@ -101,7 +99,7 @@ var runTestCmd = &cobra.Command{
 
 		nTestCases := len(infiles)
 		color.Bold.Printf("\nFound %v test cases:\n\n", nTestCases)
-		for i := 0; i < len(infiles); i++ {
+		for i := 0; i < nTestCases; i++ {
 			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
 			handle1, err := appio.FileOpener(iTestCasePath)
 			defer appio.FileCloser(handle1)
@@ -144,11 +142,18 @@ var runTestCmd = &cobra.Command{
 				color.Error.Print(" Fail ")
 				color.Red.Print(" ×")
 				color.HiWhite.Printf(" %v\n\n", iTestCasePath)
+				// show expect and actual
+				ttl := color.New(color.HiWhite, color.Bold)
+				body := color.HiWhite
+				ttl.Println("Expect:")
+				body.Printf("%v\n\n", expect)
+				ttl.Println("Actual:")
+				body.Printf("%v\n\n", actual)
 				// show diff
-				color.HiWhite.Println("Diff:")
+				ttl.Println("Diff:")
 				dmp := diffmatchpatch.New()
 				diffs := dmp.DiffMain(expect, actual, false)
-				fmt.Println(dmp.DiffPrettyText(diffs))
+				fmt.Print(dmp.DiffPrettyText(diffs) + "\n\n")
 				return
 			}
 		}

@@ -37,17 +37,12 @@ func init() {
 	// rootCmd.Flags().StringVarP(&Source, "source", "s", "", "Source directory to read from")
 }
 
-func takeProb() (string, error) {
-	var p interface{}
-	if viper.Get("p") != nil {
-		p = viper.Get("p")
-	} else if viper.Get("prob") != "" {
-		p = viper.Get("prob")
-	} else {
-		// finish.
+func getProb() (string, error) {
+	if viper.IsSet("prob") {
+		return viper.GetString("prob"), nil
+	} else { // finish.
 		return "", errors.New("flag p is required")
 	}
-	return fmt.Sprintf("%v", p), nil
 }
 
 func Execute() {
