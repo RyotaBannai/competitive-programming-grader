@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -71,15 +72,21 @@ func PeekComment(file *os.File) string {
 	}
 }
 
-func CheckDirSpecAnnotation(line string) (dirSpec string, b bool) {
-	if strings.Contains(line, consts.ANNOTATIONS.DIRSPEC) {
-		splitted := strings.Split(line, consts.ANNOTATIONS.DIRSPEC)
+func CheckDirSpecAnnotation(file *os.File) (dirSpec string, b bool) {
+	comment := PeekComment(file)
+	if strings.Contains(comment, consts.ANNOTATIONS.DIRSPEC) {
+		splitted := strings.Split(comment, consts.ANNOTATIONS.DIRSPEC)
 		token := strings.Fields(splitted[1])
 		if len(token) > 0 {
 			return token[0], true
 		}
 	}
 	return "", false
+}
+
+func CheckTestIgnoredAnnotation(file *os.File) bool {
+	comment := PeekComment(file)
+	return strings.Contains(comment, consts.ANNOTATIONS.TEST_IGNORED)
 }
 
 func ReadFileContents(file *os.File) FileCotents {
@@ -103,11 +110,18 @@ func readFileContentsByParsingComments(file *os.File, takeFirstComment bool) Fil
 	lno := 0
 	multiLFlag := false
 	tmpMultiLComment := ""
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
+	rd := bufio.NewReader(file)
+	for {
 		lno++
-		line := scanner.Text()
+		line, err := rd.ReadString('\n')
+		line = strings.TrimSpace(line)
+
 		if strings.HasSuffix(line, "*/") {
+			if strings.HasPrefix(line, "/*") { // i.g. /** some comments */
+				comments = append(comments, line)
+				foundOne = true
+				continue
+			}
 			if multiLFlag {
 				tmpMultiLComment += line
 				comments = append(comments, tmpMultiLComment)
@@ -120,13 +134,8 @@ func readFileContentsByParsingComments(file *os.File, takeFirstComment bool) Fil
 		} else if multiLFlag {
 			tmpMultiLComment += line + "\n"
 		} else if strings.HasPrefix(line, "/*") {
-			if strings.HasSuffix(line, "*/") { // i.g. /** some comments */
-				comments = append(comments, tmpMultiLComment)
-				foundOne = true
-			} else {
-				multiLFlag = true
-				tmpMultiLComment += line + "\n"
-			}
+			multiLFlag = true
+			tmpMultiLComment += line + "\n"
 		} else if strings.HasPrefix(line, "//") {
 			comments = append(comments, line)
 			foundOne = true
@@ -138,14 +147,17 @@ func readFileContentsByParsingComments(file *os.File, takeFirstComment bool) Fil
 		if takeFirstComment && foundOne { // take only first comment and return
 			return FileCotents{Contents: contents, Comments: comments}
 		}
+
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			causePanic(file.Name(), lno)
+		}
 	}
 
 	if multiLFlag { // file doesn't close multiline comment
 		causePanic(file.Name(), lno)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
 	}
 
 	return FileCotents{Contents: contents, Comments: comments}

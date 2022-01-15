@@ -35,8 +35,7 @@ var createCmd = &cobra.Command{
 			return
 		}
 
-		comment := appio.PeekComment(handle)
-		dirSpec, peekResult := appio.CheckDirSpecAnnotation(comment)
+		dirSpec, peekResult := appio.CheckDirSpecAnnotation(handle)
 
 		// create test file dir if it doesn't exist
 		testDir := conf.Test.TestfileDir

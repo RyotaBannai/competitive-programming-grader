@@ -40,8 +40,7 @@ var runTestCmd = &cobra.Command{
 			return
 		}
 
-		comment := appio.PeekComment(handle)
-		dirSpec, peekResult := appio.CheckDirSpecAnnotation(comment)
+		dirSpec, peekResult := appio.CheckDirSpecAnnotation(handle)
 		testDir := conf.Test.TestfileDir
 
 		var dirSpecPath string
@@ -97,9 +96,27 @@ var runTestCmd = &cobra.Command{
 		sort.Slice(infiles, byName(infiles))
 		sort.Slice(outfiles, byName(outfiles))
 
+		testCnt := 0
+		testUseMap := map[int]bool{}
 		nTestCases := len(infiles)
-		color.Bold.Printf("\nFound %v test cases:\n\n", nTestCases)
 		for i := 0; i < nTestCases; i++ {
+			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
+			handle, err := appio.FileOpener(iTestCasePath)
+			defer appio.FileCloser(handle)
+			if err != nil {
+				return
+			}
+			testUseMap[i] = appio.CheckTestIgnoredAnnotation(handle)
+			if !testUseMap[i] {
+				testCnt++
+			}
+		}
+
+		color.Bold.Printf("\nFound %v test cases:\n\n", testCnt)
+		for i := 0; i < nTestCases; i++ {
+			if testUseMap[i] {
+				continue
+			}
 			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
 			handle1, err := appio.FileOpener(iTestCasePath)
 			defer appio.FileCloser(handle1)

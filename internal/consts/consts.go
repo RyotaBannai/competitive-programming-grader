@@ -1,7 +1,8 @@
 package consts
 
 type CPG_ANNOTATIONS struct {
-	DIRSPEC string
+	DIRSPEC      string
+	TEST_IGNORED string
 }
 
 const (
@@ -15,5 +16,5 @@ const (
 )
 
 var (
-	ANNOTATIONS = CPG_ANNOTATIONS{DIRSPEC: "@cpg_dirspec"}
+	ANNOTATIONS = CPG_ANNOTATIONS{DIRSPEC: "@cpg_dirspec", TEST_IGNORED: "@cpg_test_ignored"}
 )
