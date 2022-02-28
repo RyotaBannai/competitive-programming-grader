@@ -84,9 +84,14 @@ func CheckDirSpecAnnotation(file *os.File) (dirSpec string, b bool) {
 	return "", false
 }
 
-func CheckTestIgnoredAnnotation(file *os.File) bool {
+func CheckTestIgnoreAnnotation(file *os.File) bool {
 	comment := PeekComment(file)
-	return strings.Contains(comment, consts.ANNOTATIONS.TEST_IGNORED)
+	return strings.Contains(comment, consts.ANNOTATIONS.TEST_IGNORE)
+}
+
+func CheckTestAllowAnnotation(file *os.File) bool {
+	comment := PeekComment(file)
+	return strings.Contains(comment, consts.ANNOTATIONS.TEST_ALLOW)
 }
 
 func ReadFileContents(file *os.File) FileCotents {

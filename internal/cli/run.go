@@ -106,7 +106,7 @@ var runTestCmd = &cobra.Command{
 			if err != nil {
 				return
 			}
-			testUseMap[i] = appio.CheckTestIgnoredAnnotation(handle)
+			testUseMap[i] = appio.CheckTestIgnoreAnnotation(handle)
 			if !testUseMap[i] {
 				testCnt++
 			}
