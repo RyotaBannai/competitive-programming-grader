@@ -96,8 +96,10 @@ var runTestCmd = &cobra.Command{
 		sort.Slice(infiles, byName(infiles))
 		sort.Slice(outfiles, byName(outfiles))
 
-		testCnt := 0
-		testUseMap := map[int]bool{}
+		testIgnoreCnt := 0
+		testAllowCnt := 0
+		testIgnoreMap := map[int]bool{}
+		testAllowMap := map[int]bool{}
 		nTestCases := len(infiles)
 		for i := 0; i < nTestCases; i++ {
 			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
@@ -106,18 +108,50 @@ var runTestCmd = &cobra.Command{
 			if err != nil {
 				return
 			}
-			testUseMap[i] = appio.CheckTestIgnoreAnnotation(handle)
-			if !testUseMap[i] {
-				testCnt++
+			testAnnotationMap := appio.CheckTestAnnotations(handle)
+			testIgnoreMap[i] = testAnnotationMap["ignore"]
+			testAllowMap[i] = testAnnotationMap["allow"]
+			if testIgnoreMap[i] {
+				testIgnoreCnt++
+			}
+			if testAllowMap[i] {
+				testAllowCnt++
 			}
 		}
 
-		color.Bold.Printf("\nFound %v test cases:\n\n", testCnt)
+		// Test Message
+		message := fmt.Sprintf(" Found %v", nTestCases)
+		if testAllowCnt > 0 {
+			message += fmt.Sprintf("/ Skip %v\n", nTestCases-testAllowCnt)
+		} else if testIgnoreCnt > 0 {
+			message += fmt.Sprintf("/ Skip %v\n", testIgnoreCnt)
+		} else {
+			message += "\n"
+		}
+
+		color.Bold.Println("\nTest Cases:")
+		color.Println(message)
 		for i := 0; i < nTestCases; i++ {
-			if testUseMap[i] {
-				continue
-			}
 			iTestCasePath := filepath.Join(inDir, infiles[i].Name())
+			displaySKipMessage := func(path string) {
+				color.New(color.Gray, color.BgDefault, color.Bold).Print(" SKIP ")
+				color.Gray.Print(" -")
+				color.Gray.Printf(" %v\n\n", path)
+			}
+
+			// check Annotations. prioritize Allow over Ignore Annotion
+			if testAllowCnt > 0 {
+				if !testAllowMap[i] {
+					displaySKipMessage(iTestCasePath)
+					continue
+				}
+			} else {
+				if testIgnoreMap[i] {
+					displaySKipMessage(iTestCasePath)
+					continue
+				}
+			}
+
 			handle1, err := appio.FileOpener(iTestCasePath)
 			defer appio.FileCloser(handle1)
 			if err != nil {
