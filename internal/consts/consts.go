@@ -6,6 +6,11 @@ type CPG_ANNOTATIONS struct {
 	TEST_ALLOW  string
 }
 
+type CONTEST_URLS struct {
+	AT_CODER_TASKS string
+	AT_CODER_TASK  string
+}
+
 const (
 	NIL                          = "<nil>"
 	APP_NAME                     = "cpg"           // unchangeable
@@ -14,6 +19,7 @@ const (
 	DEFAULT_CONF_DIR             = "."             // changeable
 	COMMAND_FILENAME_PLACEHOLDER = "{FILENAME}"    // unchangeable
 	EXECUTABLE_NAME              = "a.out"         // unchangeable
+	AT_CODER_ID_PLACEHOLDER      = "{ID}"          // unchangeable
 )
 
 var (
@@ -21,4 +27,8 @@ var (
 		DIRSPEC:     "@cpg_dirspec",
 		TEST_IGNORE: "@cpg_test_ignore",
 		TEST_ALLOW:  "@cpg_test_allow"}
+
+	URLS = CONTEST_URLS{
+		AT_CODER_TASKS: "https://atcoder.jp/contests/{ID}/tasks",
+	}
 )

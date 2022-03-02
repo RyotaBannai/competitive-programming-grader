@@ -2,7 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
+	"RyotaBannai/competitive-programming-grader/internal/consts"
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 
 	"github.com/gocolly/colly"
@@ -14,24 +16,39 @@ var fetchCmd = &cobra.Command{
 	Short:   "fetch all test cases for the contest X on AtCoder",
 	Example: "  cpg fetch -c ",
 	Run: func(cmd *cobra.Command, args []string) {
-		contestNumber, err := getContest()
+		contestId, err := getContest()
 		if err != nil {
 			fmt.Println("Please set [c] flag")
 			return
 		}
 
+		contestTaskPage := strings.Replace(consts.URLS.AT_CODER_TASKS, consts.AT_CODER_ID_PLACEHOLDER, contestId, 1)
 		controller := colly.NewCollector()
 
-		// Find and visit all links
-		controller.OnHTML("a[href]", func(e *colly.HTMLElement) {
-			e.Request.Visit(e.Attr("href"))
+		// Find tasks
+		controller.OnHTML("tbody tr td:nth-of-type(1) a", func(e *colly.HTMLElement) {
+			fmt.Println("First column of a table row:", e.Text)
+			taskPage := contestTaskPage + "/" + contestId + "_" + e.Text
+			e.Request.Visit(taskPage)
+		})
+
+		// Find in/out
+		controller.OnHTML("div.part section", func(e *colly.HTMLElement) {
+			// for _, elem := range e.DOM.Children().Nodes {
+			// 	fmt.Println("pre id:", elem.text)
+			// }
+
+			e.ForEach("pre", func(i int, e *colly.HTMLElement) {
+				a, _ := e.DOM.Html()
+				fmt.Println(a)
+			})
 		})
 
 		controller.OnRequest(func(r *colly.Request) {
 			fmt.Println("Visiting", r.URL)
 		})
 
-		controller.Visit("http://go-colly.org/")
+		controller.Visit(contestTaskPage)
 
 		// create test file dir if it doesn't exist
 		testDir := conf.Test.TestfileDir

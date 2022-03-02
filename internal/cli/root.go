@@ -30,6 +30,7 @@ var (
 func init() {
 	rootCmd.AddCommand(createCmd)
 	rootCmd.AddCommand(runTestCmd)
+	rootCmd.AddCommand(fetchCmd)
 	rootCmd.PersistentFlags().StringP("prob", "p", "", "Set problem")
 	rootCmd.PersistentFlags().StringP("contest", "c", "", "Set contenst number")
 	viper.BindPFlags(rootCmd.PersistentFlags())
