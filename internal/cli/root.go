@@ -31,6 +31,7 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	rootCmd.AddCommand(runTestCmd)
 	rootCmd.PersistentFlags().StringP("prob", "p", "", "Set problem")
+	rootCmd.PersistentFlags().StringP("contest", "c", "", "Set contenst number")
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	// or bind to private variable
 	// var Source string
@@ -42,6 +43,14 @@ func getProb() (string, error) {
 		return viper.GetString("prob"), nil
 	} else { // finish.
 		return "", errors.New("flag p is required")
+	}
+}
+
+func getContest() (string, error) {
+	if viper.IsSet("contest") {
+		return viper.GetString("contest"), nil
+	} else { // finish.
+		return "", errors.New("flag c is required")
 	}
 }
 
