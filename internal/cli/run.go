@@ -5,7 +5,6 @@ import (
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
 	"fmt"
 	"io"
-	"io/fs"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
@@ -17,6 +16,17 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 )
+
+// e.g. fs.FileInfo
+type HasName interface {
+	Name() string
+}
+
+func sortFilebyName[T HasName](s []T) {
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].Name() < s[j].Name()
+	})
+}
 
 var runTestCmd = &cobra.Command{
 	Use:     "run",
@@ -88,14 +98,8 @@ var runTestCmd = &cobra.Command{
 			}
 		}
 
-		byName := func(s []fs.FileInfo) func(int, int) bool {
-			return func(i, j int) bool {
-				return s[i].Name() < s[j].Name()
-			}
-		}
-		sort.Slice(infiles, byName(infiles))
-		sort.Slice(outfiles, byName(outfiles))
-
+		sortFilebyName(infiles)
+		sortFilebyName(outfiles)
 		testIgnoreCnt := 0
 		testAllowCnt := 0
 		testIgnoreMap := map[int]bool{}
