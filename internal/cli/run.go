@@ -3,6 +3,7 @@ package cli
 import (
 	"RyotaBannai/competitive-programming-grader/internal/consts"
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
+	"RyotaBannai/competitive-programming-grader/internal/pkg/misc"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -189,6 +190,11 @@ var runTestCmd = &cobra.Command{
 
 			expect := strings.TrimSpace(strings.Join(ofc.Contents[:], "\n"))
 			actual := strings.TrimSpace(string(out))
+			dmp := diffmatchpatch.New()
+			diffs := dmp.DiffMain(expect, actual, false)
+			misc.Debug(dmp.DiffText1(diffs))
+			misc.Debug(dmp.DiffText2(diffs))
+
 			if expect == actual { // show success message
 				color.New(color.Gray, color.BgGreen, color.Bold).Print(" PASS ")
 				color.Green.Print(" ✔")
