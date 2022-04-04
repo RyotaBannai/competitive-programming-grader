@@ -3,7 +3,6 @@ package cli
 import (
 	"RyotaBannai/competitive-programming-grader/internal/consts"
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
-	"RyotaBannai/competitive-programming-grader/internal/pkg/misc"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -188,12 +187,14 @@ var runTestCmd = &cobra.Command{
 				return
 			}
 
-			expect := strings.TrimSpace(strings.Join(ofc.Contents[:], "\n"))
-			actual := strings.TrimSpace(string(out))
-			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(expect, actual, false)
-			misc.Debug(dmp.DiffText1(diffs))
-			misc.Debug(dmp.DiffText2(diffs))
+			// clean outputs up
+			// e.g. from "1 4 7 10 \n2 5 8 11 \n3 6 9 12" to "1 4 7 10\n2 5 8 11\n3 6 9 12"
+			var cleaned []string
+			for _, l := range strings.Split(string(out), "\n") {
+				cleaned = append(cleaned, strings.TrimSpace(l))
+			}
+			expect := strings.Join(ofc.Contents, "\n")               // ReadFileContents does Trim when reading file content
+			actual := strings.TrimSpace(strings.Join(cleaned, "\n")) // trim last newline
 
 			if expect == actual { // show success message
 				color.New(color.Gray, color.BgGreen, color.Bold).Print(" PASS ")
