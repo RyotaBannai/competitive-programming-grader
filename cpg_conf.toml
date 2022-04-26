@@ -1,12 +1,26 @@
 [lang]
-language = "c++"
+# language = "C++"
+# language = "Python"
+language = "Rust"
 
 [compile]
-# compile = false
+# for python
 # command = "python {FILENAME}"
-compile = true
-command = "clang++ -std=c++14 -stdlib=libc++ -o ../../a.out {FILENAME}"
-output_dir = "../../"
+
+# for C++
+# command = "clang++ -std=c++14 -stdlib=libc++ -o ./a.out {FILENAME}"
+# output_dir = "./"
+
+# for Rust
+# 1. $ cargo init
+# 2. $ mkdir .cargo && echo $'[build]\ntarget-dir = "target"' > .cargo/config.toml # to let cargo knows where to put artifacts
+# 3. $ mkdir -p "src/bin" # and, add codes in there
+# 4. add [[bin]] to Cargo.toml, i.g. [[bin]]\nname = "a"\npath = "src/bin/a.rs"
+# 5. $ cpg run -p a
+# 6. and cpg run testcases
+# When you create src/bin/a_ac.rs, then add `// @cpg_dirspec c` at the top of the file, then cpg reads it and applies test cases of `c` to a_ac.rs
+command = "cargo run --bin {FILENAME}"
+output_dir = "./target/debug/"
 
 [test]
-testfile_dir = "../../cpg_test"
+testfile_dir = "./cpg_test"

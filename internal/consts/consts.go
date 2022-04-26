@@ -6,6 +6,12 @@ type CPG_ANNOTATIONS struct {
 	TEST_ALLOW  string
 }
 
+type CPG_RUN_TYPES struct {
+	COMPILE []string
+	SCRIPT  []string
+	RUST    []string
+}
+
 const (
 	NIL                          = "<nil>"
 	APP_NAME                     = "cpg"           // unchangeable
@@ -21,4 +27,10 @@ var (
 		DIRSPEC:     "@cpg_dirspec",
 		TEST_IGNORE: "@cpg_test_ignore",
 		TEST_ALLOW:  "@cpg_test_allow"}
+
+	RUN_TYPES = CPG_RUN_TYPES{
+		COMPILE: []string{"c++", "java", "scala", "haskell", "ocaml", "d", "c", "c#", "f#", "elixir", "nim", "typescript", "swift", "kotlin", "dart", "julia", "groovy", "clojure"},
+		SCRIPT:  []string{"python", "ruby", "perl", "php", "javascript", "r"},
+		RUST:    []string{"rust"},
+	}
 )

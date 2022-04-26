@@ -1,8 +1,9 @@
-package misc
+package lib
 
 import (
 	"fmt"
 	"reflect"
+	"sort"
 
 	"github.com/k0kubun/pp"
 )
@@ -40,4 +41,25 @@ func Zip(a, b interface{}) ([]Zipped, error) {
 	}
 
 	return r, nil
+}
+
+// e.g. fs.FileInfo
+type HasName interface {
+	Name() string
+}
+
+func SortFilebyName[T HasName](s []T) {
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].Name() < s[j].Name()
+	})
+}
+
+func Contains[T comparable](slice []T, item T) bool {
+	set := make(map[T]struct{}, len(slice))
+	for _, s := range slice {
+		set[s] = struct{}{}
+	}
+
+	_, ok := set[item]
+	return ok
 }

@@ -3,12 +3,12 @@ package cli
 import (
 	"RyotaBannai/competitive-programming-grader/internal/consts"
 	"RyotaBannai/competitive-programming-grader/internal/pkg/appio"
+	"RyotaBannai/competitive-programming-grader/internal/pkg/lib"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/gookit/color"
@@ -17,15 +17,102 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// e.g. fs.FileInfo
-type HasName interface {
-	Name() string
+type CommandFields struct {
+	args          []string // コマンド実行時の引数
+	filename      string   // 実行対象のファイル名
+	command       string   // ビルド時のコマンド
+	excutableName string   // ビルド後の artifact 名
 }
 
-func sortFilebyName[T HasName](s []T) {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i].Name() < s[j].Name()
-	})
+type Command interface {
+	Fields() CommandFields
+	Exec() (*exec.Cmd, error)
+	Build() error
+}
+
+/**
+* C++
+* and other compiled languages
+*
+* expect `./a.out` as compiled excutable filepath (or artifact)
+ */
+type CppCommand struct {
+	CommandFields
+}
+
+func (cmd *CppCommand) Build() error {
+	cmd.command = strings.Replace(conf.Compile.Command, consts.COMMAND_FILENAME_PLACEHOLDER, cmd.filename, 1)
+	// 文字列をコマンド、オプション単位でスライス化
+	if words, err := shellwords.Parse(cmd.command); err != nil {
+		return err
+	} else {
+		exec.Command(words[0], words[1:]...).Output()
+		return nil
+	}
+}
+
+func (cmd *CppCommand) Fields() CommandFields {
+	return cmd.CommandFields
+}
+
+func (cmd *CppCommand) Exec() (*exec.Cmd, error) {
+	return exec.Command(appio.Join(conf.Compile.OutputDir, cmd.excutableName)), nil
+}
+
+/**
+* Python
+* and other script languages
+ */
+type PythonCommand struct {
+	CommandFields
+}
+
+func (cmd *PythonCommand) Build() error {
+	/** Nothing to build */
+	return nil
+}
+
+func (cmd *PythonCommand) Fields() CommandFields {
+	return cmd.CommandFields
+}
+
+func (cmd *PythonCommand) Exec() (*exec.Cmd, error) {
+	cmd.command = strings.Replace(conf.Compile.Command, consts.COMMAND_FILENAME_PLACEHOLDER, cmd.filename, 1)
+	// 文字列をコマンド、オプション単位でスライス化
+	if words, err := shellwords.Parse(cmd.command); err != nil {
+		return nil, err
+	} else {
+		return exec.Command(words[0], words[1:]...), nil
+	}
+}
+
+/**
+* Rust
+*
+* Rust doesn't allow user to set output artifact name
+ */
+type RustCommand struct {
+	CommandFields
+}
+
+func (cmd *RustCommand) Build() error {
+	// Expecting using a bin name..
+	cmd.command = strings.Replace(conf.Compile.Command, consts.COMMAND_FILENAME_PLACEHOLDER, cmd.excutableName, 1)
+	// 文字列をコマンド、オプション単位でスライス化
+	if words, err := shellwords.Parse(cmd.command); err != nil {
+		return err
+	} else {
+		exec.Command(words[0], words[1:]...).Output()
+		return nil
+	}
+}
+
+func (cmd *RustCommand) Fields() CommandFields {
+	return cmd.CommandFields
+}
+
+func (cmd *RustCommand) Exec() (*exec.Cmd, error) {
+	return exec.Command(strings.Join([]string{conf.Compile.OutputDir, cmd.excutableName}, "")), nil
 }
 
 var runTestCmd = &cobra.Command{
@@ -53,15 +140,16 @@ var runTestCmd = &cobra.Command{
 		dirSpec, peekResult := appio.CheckDirSpecAnnotation(handle)
 		testDir := conf.Test.TestfileDir
 
+		// use filename as test file dir i.g. a.cpp -> a
+		// first, remove all dir path
+		targetName := strings.Split(filepath.Base(p), ".")[0]
+
 		var dirSpecPath string
 		if peekResult {
 			// found @cpg_dirspec annotation
 			dirSpecPath = filepath.Join(testDir, dirSpec)
 		} else {
-			// use filename as test file dir i.g. a.cpp -> a
-			// first, remove all dir path
-			splited := strings.Split(filepath.Base(p), ".")
-			dirSpecPath = filepath.Join(testDir, splited[0])
+			dirSpecPath = filepath.Join(testDir, targetName)
 		}
 
 		inDir := filepath.Join(dirSpecPath, "in")
@@ -83,23 +171,44 @@ var runTestCmd = &cobra.Command{
 			return
 		}
 
-		command := strings.Replace(conf.Compile.Command, consts.COMMAND_FILENAME_PLACEHOLDER, p, 1)
-		c, err := shellwords.Parse(command) // 文字列をコマンド、オプション単位でスライス化
-		if err != nil {
-			fmt.Println(err.Error())
+		var command Command
+		lang := strings.ToLower(conf.Lang.Lang)
+		if lib.Contains(consts.RUN_TYPES.COMPILE, lang) {
+			command = &CppCommand{
+				CommandFields{
+					args:          args,
+					filename:      p,
+					excutableName: consts.EXECUTABLE_NAME,
+				},
+			}
+		} else if lib.Contains(consts.RUN_TYPES.SCRIPT, lang) {
+			command = &PythonCommand{
+				CommandFields{
+					args:     args,
+					filename: p,
+				},
+			}
+		} else if lib.Contains(consts.RUN_TYPES.RUST, lang) {
+			command = &RustCommand{
+				CommandFields{
+					args:          args,
+					filename:      p,
+					excutableName: targetName,
+				},
+			}
+		} else {
+			fmt.Printf("language is invalid or unsupported yet for [%v]\n", conf.Lang.Lang)
 			return
 		}
 
-		if conf.Compile.Compile {
-			// expect compiled excutable filepath is `./a.out`
-			if _, err := exec.Command(c[0], c[1:]...).Output(); err != nil {
-				fmt.Printf("failed to compile [%v]\n", command)
-				return
-			}
+		if err := command.Build(); err != nil {
+			fmt.Println(err.Error())
+			fmt.Printf("failed to compile [%v]\n", command.Fields().command)
+			return
 		}
 
-		sortFilebyName(infiles)
-		sortFilebyName(outfiles)
+		lib.SortFilebyName(infiles)
+		lib.SortFilebyName(outfiles)
 		testIgnoreCnt := 0
 		testAllowCnt := 0
 		testIgnoreMap := map[int]bool{}
@@ -170,11 +279,11 @@ var runTestCmd = &cobra.Command{
 			ifc := appio.ReadFileContents(handle1)
 			ofc := appio.ReadFileContents(handle2)
 
-			var cmd *exec.Cmd
-			if conf.Compile.Compile { // use executable
-				cmd = exec.Command(appio.Join(conf.Compile.OutputDir, consts.EXECUTABLE_NAME))
-			} else { // use given command for script files
-				cmd = exec.Command(c[0], c[1:]...)
+			cmd, err := command.Exec()
+			if err != nil {
+				fmt.Println("command execution failed.")
+				fmt.Println(err.Error())
+				return
 			}
 
 			stdin, _ := cmd.StdinPipe()
@@ -182,7 +291,7 @@ var runTestCmd = &cobra.Command{
 			stdin.Close()
 			out, err := cmd.Output()
 			if err != nil {
-				fmt.Println("command execution failed.")
+				fmt.Println("command run failed.")
 				fmt.Println(err.Error())
 				return
 			}
